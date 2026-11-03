@@ -10,18 +10,46 @@ class ClientController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Client::withCount('appointments');
+        $query = Client::withCount('appointments')
+            ->withSum('appointments as total_spent', 'total_amount')
+            ->with(['appointments' => function ($q) {
+                $q->orderBy('date', 'desc')
+                  ->orderBy('start_time', 'desc')
+                  ->take(1)
+                  ->with(['service', 'professional']);
+            }]);
 
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('notes', 'like', "%{$search}%");
             });
         }
 
-        return response()->json($query->orderBy('name')->get());
+        $clients = $query->orderBy('name')->get();
+
+        // Format clean attributes for frontend
+        $formatted = $clients->map(function ($c) {
+            $lastApp = $c->appointments->first();
+            return [
+                'id' => $c->id,
+                'name' => $c->name,
+                'phone' => $c->phone,
+                'email' => $c->email,
+                'notes' => $c->notes,
+                'appointments_count' => $c->appointments_count ?? 0,
+                'total_spent' => (float)($c->total_spent ?? 0),
+                'last_visit_date' => $lastApp ? $lastApp->date : null,
+                'last_service_name' => $lastApp && $lastApp->service ? $lastApp->service->name : null,
+                'last_professional_name' => $lastApp && $lastApp->professional ? $lastApp->professional->name : null,
+                'created_at' => $c->created_at ? $c->created_at->format('Y-m-d') : null,
+            ];
+        });
+
+        return response()->json($formatted);
     }
 
     public function store(Request $request): JsonResponse
