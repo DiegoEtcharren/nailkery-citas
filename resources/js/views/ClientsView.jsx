@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Users, Search, Plus, Phone, Mail, FileText, Calendar } from 'lucide-react';
+import { Users, Search, Plus, Phone, Mail, FileText, Calendar, CalendarPlus } from 'lucide-react';
 
-export default function ClientsView({ clients, onAddClient }) {
+export default function ClientsView({ clients, onAddClient, onOpenNewAppointment }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [showAddModal, setShowAddModal] = useState(false);
     const [newClient, setNewClient] = useState({ name: '', phone: '', email: '', notes: '' });
@@ -12,7 +12,8 @@ export default function ClientsView({ clients, onAddClient }) {
         return (
             c.name.toLowerCase().includes(term) ||
             (c.phone && c.phone.toLowerCase().includes(term)) ||
-            (c.email && c.email.toLowerCase().includes(term))
+            (c.email && c.email.toLowerCase().includes(term)) ||
+            (c.notes && c.notes.toLowerCase().includes(term))
         );
     });
 
@@ -26,6 +27,7 @@ export default function ClientsView({ clients, onAddClient }) {
 
     return (
         <div className="space-y-6">
+            {/* Top Filter & Action Bar */}
             <div className="bento-card p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="relative w-full sm:w-80">
                     <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -40,7 +42,7 @@ export default function ClientsView({ clients, onAddClient }) {
 
                 <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                     <span className="text-xs text-gray-400 font-medium">
-                        {filteredClients.length} clientas
+                        {filteredClients.length} clientas registradas
                     </span>
                     <button
                         onClick={() => setShowAddModal(true)}
@@ -51,47 +53,112 @@ export default function ClientsView({ clients, onAddClient }) {
                 </div>
             </div>
 
-            {/* Clients Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {filteredClients.map((client) => (
-                    <div key={client.id} className="bento-card p-5 flex flex-col justify-between">
-                        <div>
-                            <div className="flex items-center justify-between">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#6366F1]/20 to-[#8B5CF6]/20 border border-indigo-500/30 flex items-center justify-center font-bold text-sm text-indigo-400 font-display">
-                                    {client.name.slice(0, 2).toUpperCase()}
-                                </div>
-                                <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/5 text-gray-300 flex items-center gap-1">
-                                    <Calendar size={12} className="text-indigo-400" />
-                                    {client.appointments_count || 0} citas
-                                </span>
-                            </div>
+            {/* Clients Table Bento Card */}
+            <div className="bento-card overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                        <thead className="bg-[#16161A]/80 border-b border-white/10 text-gray-400 uppercase font-semibold">
+                            <tr>
+                                <th className="px-6 py-4">Clienta</th>
+                                <th className="px-6 py-4">Teléfono / WhatsApp</th>
+                                <th className="px-6 py-4">Correo Electrónico</th>
+                                <th className="px-6 py-4 text-center">Historial</th>
+                                <th className="px-6 py-4">Notas & Preferencias</th>
+                                <th className="px-6 py-4 text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                            {filteredClients.length > 0 ? (
+                                filteredClients.map((client) => (
+                                    <tr key={client.id} className="hover:bg-white/[0.02] transition">
+                                        {/* Client Name + Avatar */}
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#6366F1]/20 to-[#8B5CF6]/20 border border-indigo-500/30 flex items-center justify-center font-bold text-xs text-indigo-400 font-display shrink-0">
+                                                    {client.name.slice(0, 2).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <span className="font-semibold text-white block">
+                                                        {client.name}
+                                                    </span>
+                                                    <span className="text-[11px] text-gray-500 block">
+                                                        ID: #{client.id}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
 
-                            <h3 className="font-bold text-base text-white mt-3">{client.name}</h3>
+                                        {/* Phone */}
+                                        <td className="px-6 py-4">
+                                            {client.phone ? (
+                                                <div className="flex items-center gap-2 text-gray-300">
+                                                    <Phone size={13} className="text-emerald-400 shrink-0" />
+                                                    <span className="tabular-nums font-medium">{client.phone}</span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-500 italic">No registrado</span>
+                                            )}
+                                        </td>
 
-                            <div className="mt-3 space-y-1.5 text-xs text-gray-400">
-                                {client.phone && (
-                                    <div className="flex items-center gap-2">
-                                        <Phone size={13} className="text-gray-500" />
-                                        <span>{client.phone}</span>
-                                    </div>
-                                )}
-                                {client.email && (
-                                    <div className="flex items-center gap-2">
-                                        <Mail size={13} className="text-gray-500" />
-                                        <span className="truncate">{client.email}</span>
-                                    </div>
-                                )}
-                            </div>
+                                        {/* Email */}
+                                        <td className="px-6 py-4">
+                                            {client.email ? (
+                                                <div className="flex items-center gap-2 text-gray-300">
+                                                    <Mail size={13} className="text-indigo-400 shrink-0" />
+                                                    <span className="truncate max-w-[200px]">{client.email}</span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-500 italic">No registrado</span>
+                                            )}
+                                        </td>
 
-                            {client.notes && (
-                                <div className="mt-3 p-2.5 rounded-lg bg-[#16161A] border border-white/5 text-[11px] text-gray-400 flex items-start gap-2">
-                                    <FileText size={13} className="text-indigo-400 shrink-0 mt-0.5" />
-                                    <p className="line-clamp-2">{client.notes}</p>
-                                </div>
+                                        {/* Appointments Count */}
+                                        <td className="px-6 py-4 text-center">
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 tabular-nums">
+                                                <Calendar size={12} />
+                                                {client.appointments_count || 0} citas
+                                            </span>
+                                        </td>
+
+                                        {/* Notes & Preferences */}
+                                        <td className="px-6 py-4 max-w-xs">
+                                            {client.notes ? (
+                                                <div className="flex items-start gap-1.5 text-gray-400 text-[11px]">
+                                                    <FileText size={13} className="text-amber-400 shrink-0 mt-0.5" />
+                                                    <span className="line-clamp-2" title={client.notes}>
+                                                        {client.notes}
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-600 text-[11px]">Sin notas</span>
+                                            )}
+                                        </td>
+
+                                        {/* Quick Actions */}
+                                        <td className="px-6 py-4 text-center">
+                                            {onOpenNewAppointment && (
+                                                <button
+                                                    onClick={() => onOpenNewAppointment({ client_id: client.id })}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-500/10 text-indigo-400 hover:bg-indigo-600 hover:text-white transition border border-indigo-500/20"
+                                                    title={`Agendar cita para ${client.name}`}
+                                                >
+                                                    <CalendarPlus size={13} />
+                                                    <span>Agendar</span>
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="6" className="text-center py-10 text-gray-500">
+                                        No se encontraron clientas con el criterio de búsqueda "{searchTerm}"
+                                    </td>
+                                </tr>
                             )}
-                        </div>
-                    </div>
-                ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {/* Add Client Modal */}

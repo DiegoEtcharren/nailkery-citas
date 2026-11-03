@@ -271,6 +271,7 @@ export default function App() {
                         <ClientsView
                             clients={clients}
                             onAddClient={handleQuickAddClient}
+                            onOpenNewAppointment={handleOpenNewAppointment}
                         />
                     )}
 
