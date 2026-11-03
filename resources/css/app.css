@@ -1,0 +1,70 @@
+@import 'tailwindcss';
+
+@theme {
+    --color-bg-base: #16161A;
+    --color-bg-card: #1E1E24;
+    --color-bg-card-hover: #25252D;
+    --color-brand: #6366F1;
+    --color-brand-secondary: #8B5CF6;
+    --color-emerald: #10B981;
+    --color-rose: #EF4444;
+    --color-amber: #F59E0B;
+    --color-muted: #94A3B8;
+    --color-subtle: #64748B;
+    --font-outfit: 'Outfit', sans-serif;
+    --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+:root {
+    --bg-base: #16161A;
+    --bg-card: #1E1E24;
+    --bg-card-hover: #25252D;
+    --brand: #6366F1;
+    --brand-glow: rgba(99, 102, 241, 0.25);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+}
+
+body {
+    background-color: #16161A;
+    color: #FFFFFF;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .font-display {
+    font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #16161A;
+}
+::-webkit-scrollbar-thumb {
+    background: #25252D;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #6366F1;
+}
+
+/* Bento Card Style */
+.bento-card {
+    background: #1E1E24;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bento-card:hover {
+    border-color: rgba(99, 102, 241, 0.35);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 20px -5px rgba(99, 102, 241, 0.15);
+}
+
+/* Tabular nums */
+.tabular-nums {
+    font-variant-numeric: tabular-nums;
+}
